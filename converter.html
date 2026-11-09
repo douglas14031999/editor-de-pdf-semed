@@ -15,26 +15,26 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 
 <style>
-:root{--bg:#f1f3f7;--sf:#fff;--tx:#111827;--mu:#6b7280;--ac:#4f46e5;--ac2:#eef0ff;--bd:#e3e6ee;--sh:0 1px 2px rgba(16,24,40,.06),0 4px 14px rgba(16,24,40,.06);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0c1018;--sf:#161c29;--tx:#e8eaf0;--mu:#98a2b3;--ac:#8b93ff;--ac2:#232a47;--bd:#283044}}
-:root[data-theme="dark"]{color-scheme:dark;--bg:#0c1018;--sf:#161c29;--tx:#e8eaf0;--mu:#98a2b3;--ac:#8b93ff;--ac2:#232a47;--bd:#283044}
+:root{--bg:#f8fafc;--sf:#fff;--tx:#0f172a;--mu:#64748b;--ac:#0f172a;--ac2:#f1f5f9;--bd:#e2e8f0;--sh:0 1px 3px rgba(0,0,0,.04),0 6px 16px rgba(0,0,0,.04);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#090d16;--sf:#111827;--tx:#f8fafc;--mu:#94a3b8;--ac:#f8fafc;--ac2:#1e293b;--bd:#1e293b}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#090d16;--sf:#111827;--tx:#f8fafc;--mu:#94a3b8;--ac:#f8fafc;--ac2:#1e293b;--bd:#1e293b}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0;min-height:100vh}
 body{background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column}
-svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+svg, svg.i, .card-icon svg, .ws-title svg, .dz-icon svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
 /* Header */
 header{position:sticky;top:0;z-index:20;background:var(--sf);border-bottom:1px solid var(--bd);box-shadow:var(--sh);display:flex;align-items:center;gap:12px;padding:8px 16px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:10px}
-.brand .logo{width:30px;height:30px;border-radius:8px;background:var(--ac);color:#fff;display:grid;place-items:center}
-.brand .logo svg{width:18px;height:18px;stroke:#fff}
+.brand .logo{width:32px;height:32px;border-radius:8px;background:var(--tx);color:var(--sf);display:grid;place-items:center}
+.brand .logo svg{width:18px;height:18px;stroke:var(--sf)}
 .brand h1{font-size:15px;margin:0;font-weight:600;letter-spacing:-.2px;display:flex;align-items:center;gap:8px}
-.brand .badge{font-size:11px;font-weight:500;padding:2px 7px;background:var(--ac2);color:var(--ac);border-radius:99px}
+.brand .badge{font-size:11px;font-weight:500;padding:2px 8px;background:var(--ac2);color:var(--mu);border-radius:99px;border:1px solid var(--bd)}
 .nav-links{display:flex;gap:6px;margin-left:auto;align-items:center}
 .nav-btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:8px;font-size:13px;font-weight:500;text-decoration:none;border:1px solid var(--bd);background:var(--sf);color:var(--tx);cursor:pointer;transition:.15s}
-.nav-btn:hover{background:var(--ac2);color:var(--ac);border-color:var(--ac)}
-.nav-btn.active{background:var(--ac);color:#fff;border-color:var(--ac)}
+.nav-btn:hover{background:var(--ac2);color:var(--tx);border-color:var(--tx)}
+.nav-btn.active{background:var(--tx);color:var(--sf);border-color:var(--tx)}
 
 /* Container */
 .container{max-width:1080px;width:100%;margin:0 auto;padding:28px 20px 60px;flex:1}
@@ -43,72 +43,73 @@ header{position:sticky;top:0;z-index:20;background:var(--sf);border-bottom:1px s
 .hero p{color:var(--mu);margin:0;font-size:15px}
 
 /* Filter / Mode Tabs */
-.filter-tabs{display:flex;justify-content:center;gap:8px;margin-bottom:24px;flex-wrap:wrap}
+.filter-tabs{display:flex;justify-content:center;gap:6px;margin-bottom:28px;flex-wrap:wrap}
 .ft-btn{border:1px solid var(--bd);background:var(--sf);color:var(--mu);padding:6px 14px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;transition:.15s}
-.ft-btn:hover{color:var(--tx);background:var(--ac2)}
-.ft-btn.active{background:var(--ac);color:#fff;border-color:var(--ac)}
+.ft-btn:hover{color:var(--tx);background:var(--ac2);border-color:var(--mu)}
+.ft-btn.active{background:var(--tx);color:var(--sf);border-color:var(--tx)}
 
 /* Grid de Cards */
 .tools-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:32px}
-.card{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px;cursor:pointer;transition:transform .18s,box-shadow .18s,border-color .18s;position:relative;overflow:hidden}
-.card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(16,24,40,.09);border-color:var(--ac)}
-.card-icon{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:var(--ac2);color:var(--ac)}
-.card-icon svg{width:24px;height:24px}
-.card h3{margin:0;font-size:15px;font-weight:600}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:12px;cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s;position:relative;overflow:hidden}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.06);border-color:var(--tx)}
+.card-icon{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;background:var(--ac2);border:1px solid var(--bd);color:var(--tx);transition:all .18s}
+.card:hover .card-icon{background:var(--tx);border-color:var(--tx);color:var(--sf)}
+.card-icon svg{width:22px;height:22px}
+.card h3{margin:0;font-size:14.5px;font-weight:600}
 .card p{margin:0;font-size:12.5px;color:var(--mu);line-height:1.45}
-.card .card-badge{position:absolute;top:12px;right:12px;font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:6px;background:var(--ac2);color:var(--ac)}
+.card .card-badge{position:absolute;top:14px;right:14px;font-size:11px;font-weight:500;padding:2px 8px;border-radius:6px;background:var(--ac2);border:1px solid var(--bd);color:var(--mu)}
 
 /* Active Tool View / Workspace */
-#workspace{background:var(--sf);border:1px solid var(--bd);border-radius:18px;box-shadow:var(--sh);padding:28px;margin-bottom:32px}
+#workspace{background:var(--sf);border:1px solid var(--bd);border-radius:16px;box-shadow:var(--sh);padding:26px;margin-bottom:32px}
 .ws-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--bd)}
 .ws-title{display:flex;align-items:center;gap:12px}
 .ws-title h3{margin:0;font-size:18px;font-weight:600}
 .ws-close{background:transparent;border:0;padding:6px;border-radius:8px;cursor:pointer;color:var(--mu)}
-.ws-close:hover{background:var(--ac2);color:var(--ac)}
+.ws-close:hover{background:var(--ac2);color:var(--tx)}
 
 /* Drop Zone */
-.dropzone{border:2px dashed var(--bd);border-radius:14px;padding:36px 20px;text-align:center;background:rgba(255,255,255,.02);cursor:pointer;transition:.2s}
-.dropzone.dragover{border-color:var(--ac);background:var(--ac2)}
-.dropzone .dz-icon{width:56px;height:56px;border-radius:16px;background:var(--ac2);color:var(--ac);display:grid;place-items:center;margin:0 auto 14px}
-.dropzone .dz-icon svg{width:28px;height:28px}
+.dropzone{border:2px dashed var(--bd);border-radius:14px;padding:36px 20px;text-align:center;background:transparent;cursor:pointer;transition:.2s}
+.dropzone.dragover{border-color:var(--tx);background:var(--ac2)}
+.dropzone .dz-icon{width:52px;height:52px;border-radius:14px;background:var(--ac2);border:1px solid var(--bd);color:var(--tx);display:grid;place-items:center;margin:0 auto 14px}
+.dropzone .dz-icon svg{width:26px;height:26px}
 .dropzone h4{margin:0 0 6px;font-size:16px;font-weight:600}
 .dropzone p{margin:0;font-size:13px;color:var(--mu)}
-.dropzone button{margin-top:14px;background:var(--ac);color:#fff;border:0;height:38px;padding:0 18px;border-radius:9px;font-weight:500;cursor:pointer;transition:.15s}
-.dropzone button:hover{filter:brightness(1.08)}
+.dropzone button{margin-top:14px;background:var(--tx);color:var(--sf);border:0;height:38px;padding:0 18px;border-radius:8px;font-weight:500;cursor:pointer;transition:.15s}
+.dropzone button:hover{filter:brightness(1.15)}
 
 /* File Preview List */
 .file-list{margin-top:20px;display:flex;flex-direction:column;gap:10px}
 .file-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--bd);border-radius:10px;background:var(--bg)}
 .file-item .file-name{flex:1;font-weight:500;font-size:13.5px;word-break:break-all}
 .file-item .file-size{font-size:12px;color:var(--mu);margin-left:8px}
-.file-item .file-remove{background:none;border:0;color:#ef4444;cursor:pointer;padding:4px;border-radius:6px}
-.file-item .file-remove:hover{background:#fee2e2}
+.file-item .file-remove{background:none;border:0;color:var(--mu);cursor:pointer;padding:4px;border-radius:6px}
+.file-item .file-remove:hover{background:var(--ac2);color:var(--tx)}
 
 /* Options Bar */
 .opts-bar{display:flex;align-items:center;gap:16px;margin-top:20px;padding:14px;background:var(--bg);border-radius:10px;flex-wrap:wrap}
 .opt-grp{display:flex;align-items:center;gap:8px;font-size:13px}
 .opt-grp label{color:var(--mu)}
-.opt-grp select,.opt-grp input[type=number]{height:32px;padding:0 8px;border:1px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--tx);font-size:13px}
+.opt-grp select,.opt-grp input[type=number],.opt-grp input[type=text]{height:32px;padding:0 8px;border:1px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--tx);font-size:13px}
 
 /* Action Button */
 .ws-action{margin-top:24px;display:flex;gap:12px;justify-content:flex-end}
-.btn-primary{background:var(--ac);color:#fff;border:0;height:42px;padding:0 22px;border-radius:10px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:.15s}
-.btn-primary:hover:not(:disabled){filter:brightness(1.08)}
-.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:var(--tx);color:var(--sf);border:0;height:42px;padding:0 22px;border-radius:9px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:.15s}
+.btn-primary:hover:not(:disabled){filter:brightness(1.15)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
 
 /* Progress Bar */
 .progress-box{margin-top:20px}
-.progress-bar{height:7px;background:var(--bd);border-radius:99px;overflow:hidden}
-.progress-fill{height:100%;width:0%;background:var(--ac);transition:width .2s}
+.progress-bar{height:6px;background:var(--bd);border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;width:0%;background:var(--tx);transition:width .2s}
 .progress-text{font-size:12.5px;color:var(--mu);margin-top:6px;text-align:center}
 
 /* Toast */
-#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,8px);background:#1f2430;color:#fff;padding:10px 18px;border-radius:12px;font-size:14px;box-shadow:0 8px 24px rgba(16,24,40,.3);opacity:0;pointer-events:none;transition:.25s;z-index:50}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,8px);background:#1e293b;color:#f8fafc;padding:10px 18px;border-radius:10px;font-size:13.5px;box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:.25s;z-index:50}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 
 /* Privacy footer badge */
 .privacy-badge{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:40px;color:var(--mu);font-size:13px}
-.privacy-badge svg{color:#10b981;width:17px;height:17px}
+.privacy-badge svg{color:var(--mu);width:16px;height:16px}
 </style>
 </head>
 <body>
@@ -175,57 +176,57 @@ header{position:sticky;top:0;z-index:20;background:var(--sf);border-bottom:1px s
   <!-- Grid de Ferramentas -->
   <div class="tools-grid" id="toolsGrid">
     <div class="card" data-tool="pdf-to-docx" data-cat="from-pdf">
-      <span class="card-badge">SEMED</span>
-      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></div>
+      <span class="card-badge">Word</span>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 13l1.5 5 2-4 2 4 1.5-5"/></svg></div>
       <h3>PDF para Word (.docx)</h3>
       <p>Transforma documentos PDF em arquivos editáveis do Microsoft Word preservando texto e parágrafos.</p>
     </div>
 
     <div class="card" data-tool="docx-to-pdf" data-cat="to-pdf">
-      <span class="card-badge">Popular</span>
-      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+      <span class="card-badge">PDF</span>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 17v-4h2.5a1.5 1.5 0 0 1 0 3H9"/><path d="M14 17h1.5a1.5 1.5 0 0 0 0-3H14v3"/></svg></div>
       <h3>Word (.docx) para PDF</h3>
       <p>Converte arquivos do Microsoft Word (.docx) em PDF padronizado pronto para impressão ou envio.</p>
     </div>
 
     <div class="card" data-tool="img-to-pdf" data-cat="to-pdf">
       <span class="card-badge">Fotos</span>
-      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
       <h3>Imagens (JPG/PNG) para PDF</h3>
       <p>Reúne fotos, escaneamentos e imagens avulsas em um único documento PDF organizado.</p>
     </div>
 
     <div class="card" data-tool="pdf-to-img" data-cat="from-pdf">
       <span class="card-badge">Alta Res</span>
-      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg></div>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M4 16l4.5-4.5a2 2 0 0 1 2.8 0L15 15"/><circle cx="8" cy="8" r="1.5"/><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><polyline points="14 2 14 8 20 8"/></svg></div>
       <h3>PDF para Imagens (JPG/PNG)</h3>
       <p>Extrai cada página do PDF em imagem de alta fidelidade (baixe avulsas ou em pacote .ZIP).</p>
     </div>
 
     <div class="card" data-tool="pdf-to-xlsx" data-cat="from-pdf">
       <span class="card-badge">Planilha</span>
-      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm3 4h12M6 12h12M6 17h12M10 7v10M14 7v10"/></svg></div>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg></div>
       <h3>PDF para Excel (.xlsx)</h3>
       <p>Extrai tabelas e linhas de dados do PDF diretamente para uma planilha Excel editável.</p>
     </div>
 
     <div class="card" data-tool="merge-pdf" data-cat="organize">
       <span class="card-badge">Unir</span>
-      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M8 7v10M12 4v16M16 7v10M4 12h16"/></svg></div>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M8 2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M4 6H3a1 1 0 0 0-1 1v13a2 2 0 0 0 2 2h11a1 1 0 0 0 1-1v-1"/><line x1="12" y1="7" x2="12" y2="13"/><line x1="9" y1="10" x2="15" y2="10"/></svg></div>
       <h3>Juntar múltiplos PDFs</h3>
       <p>Mescle vários arquivos PDF em um único documento sequencial com apenas um clique.</p>
     </div>
 
     <div class="card" data-tool="split-pdf" data-cat="organize">
       <span class="card-badge">Dividir</span>
-      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.242 4.242 3 3 0 004.242-4.242zm0-8.484a3 3 0 10-4.242-4.242 3 3 0 004.242 4.242z"/></svg></div>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg></div>
       <h3>Dividir PDF (Extrair páginas)</h3>
       <p>Separe intervalos de páginas ou gere um novo arquivo PDF contendo apenas as páginas desejadas.</p>
     </div>
 
     <div class="card" data-tool="pdf-to-txt" data-cat="from-pdf">
       <span class="card-badge">Texto</span>
-      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg></div>
       <h3>PDF para Texto (.txt)</h3>
       <p>Extrai todo o conteúdo textual do PDF de forma limpa e estruturada para cópia ou relatórios.</p>
     </div>
@@ -254,7 +255,7 @@ const TOOLS = {
     accept: '.pdf,application/pdf',
     acceptText: 'Formatos aceitos: PDF (.pdf)',
     multiple: false,
-    icon: '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>'
+    icon: '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 13l1.5 5 2-4 2 4 1.5-5"/></svg>'
   },
   'docx-to-pdf': {
     name: 'Word (.docx) para PDF',
@@ -262,7 +263,7 @@ const TOOLS = {
     accept: '.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     acceptText: 'Formatos aceitos: Word (.docx)',
     multiple: false,
-    icon: '<svg viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'
+    icon: '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 17v-4h2.5a1.5 1.5 0 0 1 0 3H9"/><path d="M14 17h1.5a1.5 1.5 0 0 0 0-3H14v3"/></svg>'
   },
   'img-to-pdf': {
     name: 'Imagens para PDF',
@@ -270,7 +271,7 @@ const TOOLS = {
     accept: 'image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp',
     acceptText: 'Formatos aceitos: JPG, PNG, WEBP',
     multiple: true,
-    icon: '<svg viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>'
+    icon: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>'
   },
   'pdf-to-img': {
     name: 'PDF para Imagens',
@@ -278,7 +279,7 @@ const TOOLS = {
     accept: '.pdf,application/pdf',
     acceptText: 'Formatos aceitos: PDF (.pdf)',
     multiple: false,
-    icon: '<svg viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>'
+    icon: '<svg viewBox="0 0 24 24"><path d="M4 16l4.5-4.5a2 2 0 0 1 2.8 0L15 15"/><circle cx="8" cy="8" r="1.5"/><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><polyline points="14 2 14 8 20 8"/></svg>'
   },
   'pdf-to-xlsx': {
     name: 'PDF para Excel (.xlsx)',
@@ -286,7 +287,7 @@ const TOOLS = {
     accept: '.pdf,application/pdf',
     acceptText: 'Formatos aceitos: PDF (.pdf)',
     multiple: false,
-    icon: '<svg viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm3 4h12M6 12h12M6 17h12M10 7v10M14 7v10"/></svg>'
+    icon: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>'
   },
   'merge-pdf': {
     name: 'Juntar múltiplos PDFs',
@@ -294,7 +295,7 @@ const TOOLS = {
     accept: '.pdf,application/pdf',
     acceptText: 'Formatos aceitos: 2 ou mais arquivos PDF',
     multiple: true,
-    icon: '<svg viewBox="0 0 24 24"><path d="M8 7v10M12 4v16M16 7v10M4 12h16"/></svg>'
+    icon: '<svg viewBox="0 0 24 24"><path d="M8 2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M4 6H3a1 1 0 0 0-1 1v13a2 2 0 0 0 2 2h11a1 1 0 0 0 1-1v-1"/><line x1="12" y1="7" x2="12" y2="13"/><line x1="9" y1="10" x2="15" y2="10"/></svg>'
   },
   'split-pdf': {
     name: 'Dividir PDF',
@@ -302,7 +303,7 @@ const TOOLS = {
     accept: '.pdf,application/pdf',
     acceptText: 'Formatos aceitos: PDF (.pdf)',
     multiple: false,
-    icon: '<svg viewBox="0 0 24 24"><path d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.242 4.242 3 3 0 004.242-4.242zm0-8.484a3 3 0 10-4.242-4.242 3 3 0 004.242 4.242z"/></svg>'
+    icon: '<svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>'
   },
   'pdf-to-txt': {
     name: 'PDF para Texto Puro (.txt)',
@@ -310,7 +311,7 @@ const TOOLS = {
     accept: '.pdf,application/pdf',
     acceptText: 'Formatos aceitos: PDF (.pdf)',
     multiple: false,
-    icon: '<svg viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'
+    icon: '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>'
   }
 };
 
