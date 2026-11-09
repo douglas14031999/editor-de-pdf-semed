@@ -9,7 +9,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.iife.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
@@ -485,6 +485,8 @@ $('btnConvert').onclick = async () => {
 
 /* 1. PDF para DOCX (Word) */
 async function convertPdfToDocx() {
+  const docxLib = window.docx || (typeof docx !== 'undefined' ? docx : null);
+  if (!docxLib) throw new Error('A biblioteca docx não pôde ser carregada. Verifique sua conexão.');
   const file = selectedFiles[0];
   const bytes = new Uint8Array(await file.arrayBuffer());
   const doc = await pdfjsLib.getDocument({ data: bytes }).promise;
@@ -494,38 +496,44 @@ async function convertPdfToDocx() {
     setProgress(Math.round((n / doc.numPages) * 75), `Processando página ${n} de ${doc.numPages}…`);
     const page = await doc.getPage(n);
     const tc = await page.getTextContent();
-    const lines = {};
+    const rows = [];
 
     tc.items.forEach(it => {
-      const y = Math.round(it.transform[5]);
-      if (!lines[y]) lines[y] = [];
-      lines[y].push({ x: it.transform[4], str: it.str });
+      const str = (it.str || '').trim();
+      if (!str) return;
+      const x = it.transform[4], y = it.transform[5];
+      const match = rows.find(r => Math.abs(r.y - y) < 4);
+      if (match) {
+        match.items.push({ x, str: it.str });
+      } else {
+        rows.push({ y, items: [{ x, str: it.str }] });
+      }
     });
 
-    const sortedY = Object.keys(lines).map(Number).sort((a, b) => b - a);
-    sortedY.forEach(y => {
-      const row = lines[y].sort((a, b) => a.x - b.x);
-      const rowText = row.map(r => r.str).join(' ').trim();
+    rows.sort((a, b) => b.y - a.y);
+    rows.forEach(r => {
+      r.items.sort((a, b) => a.x - b.x);
+      const rowText = r.items.map(it => it.str).join(' ').replace(/\s+/g, ' ').trim();
       if (rowText) {
-        paragraphs.push(new docx.Paragraph({
-          children: [new docx.TextRun(rowText)]
+        paragraphs.push(new docxLib.Paragraph({
+          children: [new docxLib.TextRun(rowText)]
         }));
       }
     });
 
     if (n < doc.numPages) {
-      paragraphs.push(new docx.Paragraph({
-        children: [new docx.PageBreak()]
+      paragraphs.push(new docxLib.Paragraph({
+        children: [new docxLib.PageBreak()]
       }));
     }
   }
 
   setProgress(85, 'Montando documento Word (.docx)…');
-  const wordDoc = new docx.Document({
+  const wordDoc = new docxLib.Document({
     sections: [{ properties: {}, children: paragraphs }]
   });
 
-  const blob = await docx.Packer.toBlob(wordDoc);
+  const blob = await docxLib.Packer.toBlob(wordDoc);
   const outName = file.name.replace(/\.pdf$/i, '') + '.docx';
   triggerDownload(blob, outName);
 }
