@@ -74,6 +74,13 @@ body.t-edit .hit:hover{background:rgba(79,70,229,.12);outline:1.5px solid rgba(7
 .tb .mv{cursor:grab;touch-action:none}
 .rz{display:none;position:absolute;right:-8px;bottom:-8px;width:14px;height:14px;background:var(--ac);border:2.5px solid #fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.3);cursor:ew-resize;touch-action:none}
 .ann.text.sel .rz{display:block}
+.page-tools{position:absolute;top:10px;right:10px;z-index:10;display:flex;flex-direction:column;gap:3px;background:rgba(255,255,255,.9);backdrop-filter:blur(4px);border:1px solid var(--bd);border-radius:9px;padding:3px;box-shadow:0 2px 8px rgba(16,24,40,.08);transition:opacity .15s,box-shadow .15s;opacity:.75}
+.page:hover .page-tools,.page-tools:focus-within{opacity:1;box-shadow:0 3px 12px rgba(16,24,40,.14)}
+.pt-btn{width:28px;height:28px;padding:0;border:0;background:transparent;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--tx);cursor:pointer;transition:background .15s,color .15s}
+.pt-btn svg{width:16px;height:16px}
+.pt-btn:hover:not(:disabled){background:var(--ac2);color:var(--ac)}
+.pt-btn.pt-del:hover:not(:disabled){background:#fee2e2;color:#dc2626}
+.pt-btn:disabled{opacity:.25;cursor:not-allowed}
 #toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,8px);background:#1f2430;color:#fff;padding:10px 18px;border-radius:12px;font-size:14px;box-shadow:0 8px 24px rgba(16,24,40,.3);opacity:0;pointer-events:none;transition:.25s;z-index:50}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 @media (max-width:820px){.lb{display:none}.grp{border-left:0;padding-left:0}}
@@ -165,6 +172,7 @@ async function openFile(f) {
     $('drop').hidden = true; $('bar').hidden = false; $('hint').hidden = false; setTool('edit');
     await addPages(doc, 0, w => $('pages').append(w));
     refreshGaps();
+    updatePageTools();
   } catch (err) { toast('Não foi possível abrir este PDF.'); console.error(err); }
 }
 
@@ -187,6 +195,48 @@ function refreshGaps() {
   const ws = [...document.querySelectorAll('#pages .page')];
   $('pages').prepend(mkGap(null));
   ws.forEach(w => w.after(mkGap(w)));
+  updatePageTools();
+}
+
+function movePage(wrap, dir) {
+  const ws = [...document.querySelectorAll('#pages .page')];
+  const idx = ws.indexOf(wrap);
+  if (idx === -1) return;
+  const targetIdx = idx + dir;
+  if (targetIdx < 0 || targetIdx >= ws.length) return;
+  if (dir < 0) {
+    ws[targetIdx].before(wrap);
+  } else {
+    ws[targetIdx].after(wrap);
+  }
+  refreshGaps();
+  wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  toast(dir < 0 ? 'Página movida para cima.' : 'Página movida para baixo.');
+}
+
+function deletePage(wrap) {
+  const ws = [...document.querySelectorAll('#pages .page')];
+  if (ws.length <= 1) return toast('O documento precisa ter pelo menos uma página.');
+  if (!confirm('Deseja realmente excluir esta página?')) return;
+  const pid = wrap._pid;
+  anns = anns.filter(a => {
+    if (a.page === pid) { if (a.el) a.el.remove(); return false; }
+    return true;
+  });
+  if (sel && sel.page === pid) sel = null;
+  wrap.remove();
+  refreshGaps();
+  toast('Página excluída.');
+}
+
+function updatePageTools() {
+  const ws = [...document.querySelectorAll('#pages .page')];
+  ws.forEach((w, i) => {
+    const up = w.querySelector('.pt-up'), down = w.querySelector('.pt-down'), del = w.querySelector('.pt-del');
+    if (up) up.disabled = (i === 0);
+    if (down) down.disabled = (i === ws.length - 1);
+    if (del) del.disabled = (ws.length <= 1);
+  });
 }
 $('addfile').onchange = async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
@@ -211,7 +261,21 @@ async function renderPage(page, idx, ins, src, n) {
   cv.style.width = v1.width * S + 'px'; cv.style.height = v1.height * S + 'px';
   const tl = document.createElement('div'); tl.className = 'tl';
   const an = document.createElement('div'); an.className = 'an';
-  wrap.append(cv, tl, an); wrap._pid = idx; pinfo[idx] = { src, n }; ins(wrap);
+
+  const tools = document.createElement('div'); tools.className = 'page-tools';
+  const bUp = document.createElement('button'); bUp.type = 'button'; bUp.className = 'pt-btn pt-up'; bUp.title = 'Mover página para cima';
+  bUp.innerHTML = '<svg class="i" viewBox="0 0 24 24"><path d="M12 19V5m-7 7l7-7 7 7"/></svg>';
+  const bDown = document.createElement('button'); bDown.type = 'button'; bDown.className = 'pt-btn pt-down'; bDown.title = 'Mover página para baixo';
+  bDown.innerHTML = '<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14m7-7l-7 7-7-7"/></svg>';
+  const bDel = document.createElement('button'); bDel.type = 'button'; bDel.className = 'pt-btn pt-del'; bDel.title = 'Excluir esta página';
+  bDel.innerHTML = '<svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
+
+  bUp.onclick = e => { e.stopPropagation(); movePage(wrap, -1); };
+  bDown.onclick = e => { e.stopPropagation(); movePage(wrap, 1); };
+  bDel.onclick = e => { e.stopPropagation(); deletePage(wrap); };
+
+  tools.append(bUp, bDown, bDel);
+  wrap.append(cv, tl, an, tools); wrap._pid = idx; pinfo[idx] = { src, n }; ins(wrap);
   pgs[idx] = { wrap, an };
   await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
 
@@ -381,7 +445,7 @@ async function renderPage(page, idx, ins, src, n) {
 
   // criar texto / apagar área
   wrap.addEventListener('pointerdown', e => {
-    if (e.target.closest('.ann') || e.target.closest('.hit')) return;
+    if (e.target.closest('.ann') || e.target.closest('.hit') || e.target.closest('.page-tools')) return;
     const r = wrap.getBoundingClientRect(), px = (e.clientX - r.left) / S, py = (e.clientY - r.top) / S;
     if (tool === 'text') {
       const size = +$('size').value || 14;
@@ -580,19 +644,25 @@ $('save').onclick = async () => {
   try {
     const { PDFDocument, rgb, StandardFonts } = PDFLib;
     const ws = [...document.querySelectorAll('#pages .page')], pages = {};
+    if (!ws.length) return toast('Nenhuma página para salvar.');
     let doc;
-    if (srcs.length === 1) {            // um só documento: mantém o PDF original intacto
-      doc = await PDFDocument.load(srcs[0]); const pl = doc.getPages();
+    const docOrig = await PDFDocument.load(srcs[0]);
+    const isUntouched = (srcs.length === 1) && (ws.length === docOrig.getPageCount()) && ws.every((w, i) => pinfo[w._pid].src === 0 && pinfo[w._pid].n === i);
+    if (isUntouched) {            // um só documento e ordem intacta: mantém o PDF original intacto
+      doc = docOrig; const pl = doc.getPages();
       ws.forEach(w => pages[w._pid] = pl[pinfo[w._pid].n]);
-    } else {                            // vários documentos: junta tudo na ordem da tela
+    } else {                            // páginas reordenadas, excluídas ou múltiplos arquivos: reconstrói na ordem da tela
       doc = await PDFDocument.create();
-      const need = {}, copied = {};
-      ws.forEach(w => { const q = pinfo[w._pid]; (need[q.src] = need[q.src] || []).push(q.n); });
-      for (const sIdx in need) {
-        const sd = await PDFDocument.load(srcs[sIdx]), idxs = need[sIdx];
-        const cps = await doc.copyPages(sd, idxs); idxs.forEach((n, k) => copied[sIdx + ':' + n] = cps[k]);
+      const loadedSrcs = {};
+      for (const w of ws) {
+        const q = pinfo[w._pid];
+        if (!loadedSrcs[q.src]) loadedSrcs[q.src] = await PDFDocument.load(srcs[q.src]);
       }
-      ws.forEach(w => { const q = pinfo[w._pid]; pages[w._pid] = doc.addPage(copied[q.src + ':' + q.n]); });
+      for (const w of ws) {
+        const q = pinfo[w._pid];
+        const [cp] = await doc.copyPages(loadedSrcs[q.src], [q.n]);
+        pages[w._pid] = doc.addPage(cp);
+      }
     }
     const FN = { Helvetica: ['Helvetica', 'HelveticaBold', 'HelveticaOblique', 'HelveticaBoldOblique'], Times: ['TimesRoman', 'TimesRomanBold', 'TimesRomanItalic', 'TimesRomanBoldItalic'], Courier: ['Courier', 'CourierBold', 'CourierOblique', 'CourierBoldOblique'] };
     const F = {};
