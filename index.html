@@ -53,7 +53,7 @@ input[type=number]{width:64px;padding:0 8px}
 .gap{height:38px;flex:none;display:flex;align-items:center;justify-content:center}
 .gap button{height:26px;padding:0 12px;border:0;background:transparent;color:var(--mu);font-size:12.5px;border-radius:13px;opacity:.6}
 .gap button:hover,.gap button:focus-visible{opacity:1;color:var(--ac);background:var(--ac2)}
-.page{scroll-margin-top:70px;position:relative;background:#fff;border-radius:3px;box-shadow:0 1px 3px rgba(16,24,40,.12),0 12px 32px rgba(16,24,40,.16);flex:none}
+.page{scroll-margin-top:70px;position:relative;background:#fff;border-radius:3px;box-shadow:0 1px 3px rgba(16,24,40,.12),0 12px 32px rgba(16,24,40,.16);flex:none;overflow:hidden}
 .page canvas{display:block}
 .tl,.an{position:absolute;inset:0}
 .an{pointer-events:none;z-index:3}
@@ -66,21 +66,25 @@ body.t-edit .hit:hover{background:rgba(79,70,229,.12);outline:1.5px solid rgba(7
 .ann{position:absolute;pointer-events:auto}
 .ann.cover{background:#fff}
 .ann.sel{outline:1.5px solid var(--ac);outline-offset:2px;border-radius:2px}
-.ann .ed{white-space:pre;outline:none;line-height:1.2;min-width:20px;min-height:1.2em;color:#000}
+.ann .ed{white-space:pre-wrap;word-break:break-word;overflow-wrap:break-word;outline:none;line-height:1.2;min-width:20px;min-height:1.2em;color:#000}
 .tb{display:none;position:absolute;left:-2px;bottom:100%;margin-bottom:7px;gap:2px;background:#1f2430;border-radius:10px;padding:3px;z-index:9;box-shadow:0 6px 18px rgba(16,24,40,.3)}
+.ann.top-edge .tb{bottom:auto;top:100%;margin-top:7px;margin-bottom:0}
 .ann.sel .tb{display:flex}
 .tb span{width:28px;height:28px;display:grid;place-items:center;border-radius:7px;cursor:pointer;user-select:none;color:#e5e7eb}
 .tb span:hover{background:rgba(255,255,255,.16)}
 .tb .mv{cursor:grab;touch-action:none}
 .rz{display:none;position:absolute;right:-8px;bottom:-8px;width:14px;height:14px;background:var(--ac);border:2.5px solid #fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.3);cursor:ew-resize;touch-action:none}
 .ann.text.sel .rz{display:block}
-.page-tools{position:absolute;top:10px;right:10px;z-index:10;display:flex;flex-direction:column;gap:3px;background:rgba(255,255,255,.9);backdrop-filter:blur(4px);border:1px solid var(--bd);border-radius:9px;padding:3px;box-shadow:0 2px 8px rgba(16,24,40,.08);transition:opacity .15s,box-shadow .15s;opacity:.75}
-.page:hover .page-tools,.page-tools:focus-within{opacity:1;box-shadow:0 3px 12px rgba(16,24,40,.14)}
-.pt-btn{width:28px;height:28px;padding:0;border:0;background:transparent;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--tx);cursor:pointer;transition:background .15s,color .15s}
+.page-tools{position:absolute;top:10px;right:10px;z-index:10;display:flex;flex-direction:column;gap:3px;background:none;border:none;box-shadow:none;padding:0}
+.pt-btn{width:28px;height:28px;padding:0;border:0;background:transparent;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#374151;cursor:pointer;transition:background .15s,color .15s,opacity .15s}
 .pt-btn svg{width:16px;height:16px}
-.pt-btn:hover:not(:disabled){background:var(--ac2);color:var(--ac)}
-.pt-btn.pt-del:hover:not(:disabled){background:#fee2e2;color:#dc2626}
-.pt-btn:disabled{opacity:.25;cursor:not-allowed}
+.pt-btn:hover:not(:disabled){background:rgba(79,70,229,.1);color:#4f46e5}
+.pt-btn.pt-del:hover:not(:disabled){background:rgba(220,38,38,.12);color:#dc2626}
+.pt-btn:disabled{opacity:.2;cursor:not-allowed}
+.page-body{position:relative;width:100%;height:100%;transform-origin:top left;transition:transform .2s cubic-bezier(.2,0,0,1)}
+.page.page-dragging{opacity:.45}
+.page.page-drop-before{box-shadow:0 -4px 0 0 var(--ac),var(--sh)}
+.page.page-drop-after{box-shadow:0 4px 0 0 var(--ac),var(--sh)}
 #toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,8px);background:#1f2430;color:#fff;padding:10px 18px;border-radius:12px;font-size:14px;box-shadow:0 8px 24px rgba(16,24,40,.3);opacity:0;pointer-events:none;transition:.25s;z-index:50}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 @media (max-width:820px){.lb{display:none}.grp{border-left:0;padding-left:0}}
@@ -99,6 +103,10 @@ body.t-edit .hit:hover{background:rgba(79,70,229,.12);outline:1.5px solid rgba(7
     <button data-t="edit" class="on" title="Clique em um texto do PDF para editá-lo"><svg class="i" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg><span class="lb">Editar texto</span></button>
     <button data-t="text" title="Clique na página para escrever"><svg class="i" viewBox="0 0 24 24"><path d="M4 7V5h16v2M12 5v14M9 19h6"/></svg><span class="lb">Novo texto</span></button>
     <button data-t="erase" title="Arraste para cobrir uma área"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="3"/></svg><span class="lb">Apagar área</span></button>
+  </div>
+  <div class="seg sm" role="group" aria-label="Histórico">
+    <button id="bUndo" title="Desfazer (Ctrl+Z)" disabled><svg class="i" viewBox="0 0 24 24"><path d="M3 10h10a5 5 0 0 1 5 5v2m-15-7l4-4m-4 4l4 4"/></svg></button>
+    <button id="bRedo" title="Refazer (Ctrl+Y)" disabled><svg class="i" viewBox="0 0 24 24"><path d="M21 10H11a5 5 0 0 0-5 5v2m15-7l-4-4m4 4l-4 4"/></svg></button>
   </div>
   <div class="grp">
     <select id="font" title="Fonte"><option>Helvetica</option><option>Times</option><option>Courier</option></select>
@@ -141,6 +149,7 @@ const S = 1.5, FONTS = {Helvetica:'Arial,Helvetica,sans-serif', Times:'"Times Ne
 const $ = id => document.getElementById(id);
 let bytes, fileName = 'documento.pdf', anns = [], pgs = [], tool = 'edit', sel = null, nid = 1;
 let srcs = [], pinfo = {}, pidN = 0, addAfter = null;   // srcs: PDFs de origem; pinfo: página -> {origem, nº da página}
+let undoStack = [], redoStack = [], draggedWrap = null;
 try { pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; } catch (e) {}
 
 const HINTS = {
@@ -149,6 +158,107 @@ const HINTS = {
   erase: 'Arraste na página para cobrir uma área com branco.'
 };
 function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2600); }
+
+/* ---------- histórico: desfazer / refazer ---------- */
+function recordAction(act) {
+  undoStack.push(act);
+  redoStack.length = 0;
+  updateHistoryButtons();
+}
+function updateHistoryButtons() {
+  const u = $('bUndo'), r = $('bRedo');
+  if (u) u.disabled = undoStack.length === 0;
+  if (r) r.disabled = redoStack.length === 0;
+}
+function undo() {
+  if (!undoStack.length) return toast('Nada para desfazer.');
+  const act = undoStack.pop();
+  if (act.type === 'add_ann') {
+    removeAnn(act.ann, false);
+  } else if (act.type === 'edit_hit') {
+    act.hit.style.display = '';
+    act.cover.el.remove();
+    act.text.el.remove();
+    anns = anns.filter(x => x !== act.cover && x !== act.text);
+    if (sel === act.text) sel = null;
+  } else if (act.type === 'remove_ann') {
+    anns.push(act.ann);
+    pgs[act.ann.page].an.append(act.ann.el);
+    place(act.ann); style(act.ann);
+    if (act.cover) {
+      anns.push(act.cover);
+      pgs[act.cover.page].an.append(act.cover.el);
+      place(act.cover);
+    }
+    if (act.hit) act.hit.style.display = 'none';
+    select_(act.ann);
+  } else if (act.type === 'move_page') {
+    const ws = [...document.querySelectorAll('#pages .page')].filter(w => w !== act.wrap);
+    if (act.fromIdx >= ws.length) {
+      ws[ws.length - 1].after(act.wrap);
+    } else {
+      ws[act.fromIdx].before(act.wrap);
+    }
+    refreshGaps();
+    act.wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } else if (act.type === 'rotate_page') {
+    applyPageRotation(act.wrap, -act.delta);
+  } else if (act.type === 'delete_page') {
+    const ws = [...document.querySelectorAll('#pages .page')];
+    if (act.idx >= ws.length) {
+      $('#pages').append(act.wrap);
+    } else {
+      ws[act.idx].before(act.wrap);
+    }
+    act.removedAnns.forEach(a => {
+      anns.push(a);
+      pgs[a.page].an.append(a.el);
+    });
+    refreshGaps();
+    act.wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  redoStack.push(act);
+  updateHistoryButtons();
+  toast('Alteração desfeita.');
+}
+function redo() {
+  if (!redoStack.length) return toast('Nada para refazer.');
+  const act = redoStack.pop();
+  if (act.type === 'add_ann') {
+    anns.push(act.ann);
+    pgs[act.ann.page].an.append(act.ann.el);
+    place(act.ann); style(act.ann);
+    select_(act.ann);
+  } else if (act.type === 'edit_hit') {
+    act.hit.style.display = 'none';
+    anns.push(act.cover); pgs[act.cover.page].an.append(act.cover.el); place(act.cover);
+    anns.push(act.text); pgs[act.text.page].an.append(act.text.el); place(act.text); style(act.text);
+    select_(act.text);
+  } else if (act.type === 'remove_ann') {
+    removeAnn(act.ann, false);
+  } else if (act.type === 'move_page') {
+    const ws = [...document.querySelectorAll('#pages .page')];
+    const filtered = ws.filter(w => w !== act.wrap);
+    if (act.toIdx >= filtered.length) {
+      filtered[filtered.length - 1].after(act.wrap);
+    } else {
+      filtered[act.toIdx].before(act.wrap);
+    }
+    refreshGaps();
+    act.wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } else if (act.type === 'rotate_page') {
+    applyPageRotation(act.wrap, act.delta);
+  } else if (act.type === 'delete_page') {
+    anns = anns.filter(a => a.page !== act.wrap._pid);
+    act.wrap.remove();
+    refreshGaps();
+  }
+  undoStack.push(act);
+  updateHistoryButtons();
+  toast('Alteração refeita.');
+}
+$('bUndo').onclick = undo;
+$('bRedo').onclick = redo;
 
 function setTool(t) {
   tool = t; document.body.className = 't-' + t;
@@ -169,6 +279,7 @@ async function openFile(f) {
     fileName = f.name; bytes = new Uint8Array(await f.arrayBuffer());
     const doc = await pdfjsLib.getDocument({ data: bytes.slice() }).promise;
     anns = []; pgs = []; sel = null; $('pages').innerHTML = ''; srcs = [bytes]; pinfo = {}; pidN = 0;
+    undoStack.length = 0; redoStack.length = 0; updateHistoryButtons();
     $('drop').hidden = true; $('bar').hidden = false; $('hint').hidden = false; setTool('edit');
     await addPages(doc, 0, w => $('pages').append(w));
     refreshGaps();
@@ -198,12 +309,15 @@ function refreshGaps() {
   updatePageTools();
 }
 
-function movePage(wrap, dir) {
+function movePage(wrap, dir, record = true) {
   const ws = [...document.querySelectorAll('#pages .page')];
   const idx = ws.indexOf(wrap);
   if (idx === -1) return;
   const targetIdx = idx + dir;
   if (targetIdx < 0 || targetIdx >= ws.length) return;
+  if (record) {
+    recordAction({ type: 'move_page', wrap, fromIdx: idx, toIdx: targetIdx });
+  }
   if (dir < 0) {
     ws[targetIdx].before(wrap);
   } else {
@@ -214,11 +328,48 @@ function movePage(wrap, dir) {
   toast(dir < 0 ? 'Página movida para cima.' : 'Página movida para baixo.');
 }
 
-function deletePage(wrap) {
+function applyPageRotation(wrap, delta) {
+  wrap._rot = ((wrap._rot || 0) + delta) % 360;
+  if (wrap._rot < 0) wrap._rot += 360;
+  const body = wrap.querySelector('.page-body');
+  const w = wrap._origW, h = wrap._origH;
+  if (wrap._rot === 90) {
+    wrap.style.width = h + 'px';
+    wrap.style.height = w + 'px';
+    if (body) body.style.transform = `translate(${h}px, 0px) rotate(90deg)`;
+  } else if (wrap._rot === 180) {
+    wrap.style.width = w + 'px';
+    wrap.style.height = h + 'px';
+    if (body) body.style.transform = `translate(${w}px, ${h}px) rotate(180deg)`;
+  } else if (wrap._rot === 270) {
+    wrap.style.width = h + 'px';
+    wrap.style.height = w + 'px';
+    if (body) body.style.transform = `translate(0px, ${w}px) rotate(270deg)`;
+  } else {
+    wrap.style.width = w + 'px';
+    wrap.style.height = h + 'px';
+    if (body) body.style.transform = 'none';
+  }
+}
+
+function rotatePage(wrap, delta = 90, record = true) {
+  if (record) {
+    recordAction({ type: 'rotate_page', wrap, delta });
+  }
+  applyPageRotation(wrap, delta);
+  toast(`Página girada em ${delta}°.`);
+}
+
+function deletePage(wrap, record = true) {
   const ws = [...document.querySelectorAll('#pages .page')];
   if (ws.length <= 1) return toast('O documento precisa ter pelo menos uma página.');
   if (!confirm('Deseja realmente excluir esta página?')) return;
+  const idx = ws.indexOf(wrap);
   const pid = wrap._pid;
+  const removedAnns = anns.filter(a => a.page === pid);
+  if (record) {
+    recordAction({ type: 'delete_page', wrap, idx, removedAnns });
+  }
   anns = anns.filter(a => {
     if (a.page === pid) { if (a.el) a.el.remove(); return false; }
     return true;
@@ -256,26 +407,71 @@ async function renderPage(page, idx, ins, src, n) {
   const v1 = page.getViewport({ scale: 1 }), dpr = Math.min(devicePixelRatio || 1, 2);
   const vp = page.getViewport({ scale: S * dpr });
   const wrap = document.createElement('div'); wrap.className = 'page';
-  wrap.style.width = v1.width * S + 'px'; wrap.style.height = v1.height * S + 'px';
+  wrap._origW = v1.width * S;
+  wrap._origH = v1.height * S;
+  wrap._rot = 0;
+  wrap.style.width = wrap._origW + 'px';
+  wrap.style.height = wrap._origH + 'px';
+
+  const body = document.createElement('div'); body.className = 'page-body';
+  body.style.width = wrap._origW + 'px'; body.style.height = wrap._origH + 'px';
+
   const cv = document.createElement('canvas'); cv.width = vp.width; cv.height = vp.height;
-  cv.style.width = v1.width * S + 'px'; cv.style.height = v1.height * S + 'px';
+  cv.style.width = wrap._origW + 'px'; cv.style.height = wrap._origH + 'px';
   const tl = document.createElement('div'); tl.className = 'tl';
   const an = document.createElement('div'); an.className = 'an';
+  body.append(cv, tl, an);
 
   const tools = document.createElement('div'); tools.className = 'page-tools';
   const bUp = document.createElement('button'); bUp.type = 'button'; bUp.className = 'pt-btn pt-up'; bUp.title = 'Mover página para cima';
   bUp.innerHTML = '<svg class="i" viewBox="0 0 24 24"><path d="M12 19V5m-7 7l7-7 7 7"/></svg>';
   const bDown = document.createElement('button'); bDown.type = 'button'; bDown.className = 'pt-btn pt-down'; bDown.title = 'Mover página para baixo';
   bDown.innerHTML = '<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14m7-7l-7 7-7-7"/></svg>';
+  const bRot = document.createElement('button'); bRot.type = 'button'; bRot.className = 'pt-btn pt-rot'; bRot.title = 'Girar página 90°';
+  bRot.innerHTML = '<svg class="i" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-9-9c2.52 0 4.85.83 6.72 2.24L21 8"/><path d="M21 3v5h-5"/></svg>';
   const bDel = document.createElement('button'); bDel.type = 'button'; bDel.className = 'pt-btn pt-del'; bDel.title = 'Excluir esta página';
   bDel.innerHTML = '<svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
 
   bUp.onclick = e => { e.stopPropagation(); movePage(wrap, -1); };
   bDown.onclick = e => { e.stopPropagation(); movePage(wrap, 1); };
+  bRot.onclick = e => { e.stopPropagation(); rotatePage(wrap, 90); };
   bDel.onclick = e => { e.stopPropagation(); deletePage(wrap); };
 
-  tools.append(bUp, bDown, bDel);
-  wrap.append(cv, tl, an, tools); wrap._pid = idx; pinfo[idx] = { src, n }; ins(wrap);
+  tools.append(bUp, bDown, bRot, bDel);
+
+  wrap.ondragover = e => {
+    if (!draggedWrap || draggedWrap === wrap) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const r = wrap.getBoundingClientRect();
+    const isTop = e.clientY < r.top + r.height / 2;
+    wrap.classList.toggle('page-drop-before', isTop);
+    wrap.classList.toggle('page-drop-after', !isTop);
+  };
+  wrap.ondragleave = () => {
+    wrap.classList.remove('page-drop-before', 'page-drop-after');
+  };
+  wrap.ondrop = e => {
+    if (!draggedWrap || draggedWrap === wrap) return;
+    e.preventDefault();
+    const ws = [...document.querySelectorAll('#pages .page')];
+    const fromIdx = ws.indexOf(draggedWrap);
+    const r = wrap.getBoundingClientRect();
+    const isTop = e.clientY < r.top + r.height / 2;
+    if (isTop) {
+      wrap.before(draggedWrap);
+    } else {
+      wrap.after(draggedWrap);
+    }
+    const newWs = [...document.querySelectorAll('#pages .page')];
+    const toIdx = newWs.indexOf(draggedWrap);
+    recordAction({ type: 'move_page', wrap: draggedWrap, fromIdx, toIdx });
+    refreshGaps();
+    draggedWrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    toast('Página reordenada.');
+  };
+
+  wrap.append(body, tools); wrap._pid = idx; pinfo[idx] = { src, n }; ins(wrap);
   pgs[idx] = { wrap, an };
   await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
 
@@ -435,10 +631,14 @@ async function renderPage(page, idx, ins, src, n) {
         rs.forEach(r => push(r.s, r));
       });
       const text = runs.map(r => r.s).join('');
-      const cover = addAnn({ type: 'cover', page: idx, x: x - 1, y: top, w: x1 - x + 2, h: ph }, true);
+      const bounds = getPageBounds(idx);
+      const maxAvail = Math.max(30, bounds.w - x - 12);
+      const initW = soft ? Math.min(pw * 1.03 + 1, maxAvail) : (pw > maxAvail ? maxAvail : undefined);
+      const cover = addAnn({ type: 'cover', page: idx, x: x - 1, y: top, w: x1 - x + 2, h: ph }, false);
       cover.hit = h; h.style.display = 'none';
-      const t = addAnn({ type: 'text', page: idx, x, y: f.b - size * (lh / 2 + .35), text, runs, size: Math.round(size * 10) / 10, lh, color: pCol, font: pFont, w: soft ? pw * 1.03 + 1 : undefined }, true);
+      const t = addAnn({ type: 'text', page: idx, x, y: f.b - size * (lh / 2 + .35), text, runs, size: Math.round(size * 10) / 10, lh, color: pCol, font: pFont, w: initW }, true);
       t.cover = cover; focusEd(t);
+      recordAction({ type: 'edit_hit', text: t, cover, hit: h });
     };
     tl.append(h);
   }
@@ -447,27 +647,44 @@ async function renderPage(page, idx, ins, src, n) {
   wrap.addEventListener('pointerdown', e => {
     if (e.target.closest('.ann') || e.target.closest('.hit') || e.target.closest('.page-tools')) return;
     const r = wrap.getBoundingClientRect(), px = (e.clientX - r.left) / S, py = (e.clientY - r.top) / S;
+    const bounds = getPageBounds(idx);
     if (tool === 'text') {
       const size = +$('size').value || 14;
-      const a = addAnn({ type: 'text', page: idx, x: px, y: py - size / 2, text: 'Texto', size, color: $('color').value, font: $('font').value }, true);
+      const x = Math.max(0, Math.min(bounds.w - 40, px));
+      const y = Math.max(0, Math.min(bounds.h - size, py - size / 2));
+      const a = addAnn({ type: 'text', page: idx, x, y, text: 'Texto', size, color: $('color').value, font: $('font').value }, true);
       focusEd(a, true); e.preventDefault();
+      recordAction({ type: 'add_ann', ann: a });
     } else if (tool === 'erase') {
       const box = document.createElement('div');
       box.style.cssText = 'position:absolute;border:1.5px dashed #2563eb;background:rgba(37,99,235,.15);z-index:5';
       an.append(box); wrap.setPointerCapture(e.pointerId);
+      const cx = Math.max(0, Math.min(bounds.w, px)), cy = Math.max(0, Math.min(bounds.h, py));
       const mv = ev => {
-        const x2 = (ev.clientX - r.left) / S, y2 = (ev.clientY - r.top) / S;
-        const x = Math.min(px, x2), y = Math.min(py, y2);
-        Object.assign(box.style, { left: x * S + 'px', top: y * S + 'px', width: Math.abs(x2 - px) * S + 'px', height: Math.abs(y2 - py) * S + 'px' });
-        box._r = { x, y, w: Math.abs(x2 - px), h: Math.abs(y2 - py) };
+        const x2 = Math.max(0, Math.min(bounds.w, (ev.clientX - r.left) / S));
+        const y2 = Math.max(0, Math.min(bounds.h, (ev.clientY - r.top) / S));
+        const x = Math.min(cx, x2), y = Math.min(cy, y2);
+        const w = Math.min(bounds.w - x, Math.abs(x2 - cx)), h = Math.min(bounds.h - y, Math.abs(y2 - cy));
+        Object.assign(box.style, { left: x * S + 'px', top: y * S + 'px', width: w * S + 'px', height: h * S + 'px' });
+        box._r = { x, y, w, h };
       };
       const up = () => {
         wrap.removeEventListener('pointermove', mv); wrap.removeEventListener('pointerup', up); box.remove();
-        if (box._r && box._r.w > 3 && box._r.h > 3) addAnn({ type: 'cover', page: idx, ...box._r }, true);
+        if (box._r && box._r.w > 3 && box._r.h > 3) {
+          const a = addAnn({ type: 'cover', page: idx, ...box._r }, true);
+          recordAction({ type: 'add_ann', ann: a });
+        }
       };
       wrap.addEventListener('pointermove', mv); wrap.addEventListener('pointerup', up);
     }
   });
+}
+
+function getPageBounds(pageIdx) {
+  const p = pgs[pageIdx];
+  const w = (p && p.wrap && p.wrap._origW) ? (p.wrap._origW / S) : 595.28;
+  const h = (p && p.wrap && p.wrap._origH) ? (p.wrap._origH / S) : 841.89;
+  return { w, h };
 }
 
 /* ---------- anotações ---------- */
@@ -491,7 +708,12 @@ function addAnn(a, select) {
     rz.onpointerdown = e => {
       e.stopPropagation(); e.preventDefault(); select_(a); rz.setPointerCapture(e.pointerId);
       const sx = e.clientX, w0 = ed.offsetWidth / S;
-      rz.onpointermove = ev => { a.w = Math.max(30, w0 + (ev.clientX - sx) / S); style(a); };
+      rz.onpointermove = ev => {
+        const bounds = getPageBounds(a.page);
+        const maxW = Math.max(30, bounds.w - a.x - 12);
+        a.w = Math.min(maxW, Math.max(30, w0 + (ev.clientX - sx) / S));
+        style(a);
+      };
       rz.onpointerup = () => { rz.onpointermove = rz.onpointerup = null; };
     };
   } else el.style.zIndex = 1;
@@ -500,7 +722,12 @@ function addAnn(a, select) {
   mv.onpointerdown = e => {
     e.stopPropagation(); e.preventDefault(); select_(a); mv.setPointerCapture(e.pointerId);
     const sx = e.clientX, sy = e.clientY, ox = a.x, oy = a.y;
-    mv.onpointermove = ev => { a.x = ox + (ev.clientX - sx) / S; a.y = oy + (ev.clientY - sy) / S; place(a); };
+    mv.onpointermove = ev => {
+      const bounds = getPageBounds(a.page);
+      a.x = Math.max(0, Math.min(bounds.w - 20, ox + (ev.clientX - sx) / S));
+      a.y = Math.max(0, Math.min(bounds.h - 15, oy + (ev.clientY - sy) / S));
+      place(a); style(a);
+    };
     mv.onpointerup = () => { mv.onpointermove = mv.onpointerup = null; };
   };
   pgs[a.page].an.append(el); place(a); style(a);
@@ -508,15 +735,26 @@ function addAnn(a, select) {
   return a;
 }
 function place(a) {
+  const bounds = getPageBounds(a.page);
+  a.x = Math.max(0, Math.min(bounds.w - 15, a.x));
+  a.y = Math.max(0, Math.min(bounds.h - 15, a.y));
   const s = a.el.style; s.left = a.x * S + 'px'; s.top = a.y * S + 'px';
-  if (a.type === 'cover') { s.width = a.w * S + 'px'; s.height = a.h * S + 'px'; }
+  if (a.y < 35) a.el.classList.add('top-edge'); else a.el.classList.remove('top-edge');
+  if (a.type === 'cover') {
+    a.w = Math.min(a.w, bounds.w - a.x);
+    a.h = Math.min(a.h, bounds.h - a.y);
+    s.width = a.w * S + 'px'; s.height = a.h * S + 'px';
+  }
 }
 function style(a) {
   if (a.type !== 'text') return;
+  const bounds = getPageBounds(a.page);
+  const maxW = Math.max(30, bounds.w - a.x - 12);
+  if (a.w && a.w > maxW) a.w = maxW;
   Object.assign(a.ed.style, {
     fontSize: a.size * S + 'px', color: a.color, fontFamily: FONTS[a.font], lineHeight: a.lh || 1.2, letterSpacing: (a.ls || 0) * S + 'px',
     fontWeight: a.b ? '700' : '400', fontStyle: a.i ? 'italic' : 'normal', textDecoration: a.u ? 'underline' : 'none',
-    whiteSpace: a.w ? 'pre-wrap' : 'pre', width: a.w ? a.w * S + 'px' : '', overflowWrap: 'break-word'
+    whiteSpace: 'pre-wrap', width: a.w ? a.w * S + 'px' : '', maxWidth: (maxW * S) + 'px', overflowWrap: 'break-word', wordBreak: 'break-word'
   });
 }
 function select_(a) {
@@ -525,9 +763,15 @@ function select_(a) {
   if (a.type === 'text') { $('size').value = a.size; $('color').value = a.color; $('font').value = a.font; }
   sync(); spSync();
 }
-function removeAnn(a) {
+function removeAnn(a, record = true) {
+  if (record) {
+    recordAction({ type: 'remove_ann', ann: a, cover: a.cover, hit: a.hit });
+  }
   a.el.remove(); anns = anns.filter(x => x !== a); if (sel === a) sel = null;
-  if (a.cover) removeAnn(a.cover);          // desfaz a edição: volta o texto original
+  if (a.cover) {
+    a.cover.el.remove();
+    anns = anns.filter(x => x !== a.cover);
+  }
   if (a.hit) a.hit.style.display = '';
 }
 function focusEd(a, all) {
@@ -536,7 +780,28 @@ function focusEd(a, all) {
   const s = getSelection(); s.removeAllRanges(); s.addRange(r);
 }
 addEventListener('pointerdown', e => { if (!e.target.closest('#spWrap')) $('spPanel').hidden = true; if (!e.target.closest('.ann, header') && sel) { sel.el.classList.remove('sel'); sel = null; } });
-addEventListener('keydown', e => { if ((e.key === 'Delete') && sel && document.activeElement !== sel.ed) removeAnn(sel); });
+addEventListener('keydown', e => {
+  const isCtrl = e.ctrlKey || e.metaKey;
+  if (isCtrl && !e.altKey) {
+    if (e.key === 'z' || e.key === 'Z') {
+      const inEd = document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('ed');
+      if (e.shiftKey) {
+        e.preventDefault();
+        redo();
+      } else if (!inEd) {
+        e.preventDefault();
+        undo();
+      }
+    } else if (e.key === 'y' || e.key === 'Y') {
+      const inEd = document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('ed');
+      if (!inEd) {
+        e.preventDefault();
+        redo();
+      }
+    }
+  }
+  if ((e.key === 'Delete') && sel && document.activeElement !== sel.ed) removeAnn(sel);
+});
 
 ['size', 'color', 'font'].forEach(id => $(id).oninput = () => {
   if (sel && sel.type === 'text') { sel.size = +$('size').value || sel.size; sel.color = $('color').value; sel.font = $('font').value; style(sel); }
@@ -647,11 +912,11 @@ $('save').onclick = async () => {
     if (!ws.length) return toast('Nenhuma página para salvar.');
     let doc;
     const docOrig = await PDFDocument.load(srcs[0]);
-    const isUntouched = (srcs.length === 1) && (ws.length === docOrig.getPageCount()) && ws.every((w, i) => pinfo[w._pid].src === 0 && pinfo[w._pid].n === i);
+    const isUntouched = (srcs.length === 1) && (ws.length === docOrig.getPageCount()) && ws.every((w, i) => pinfo[w._pid].src === 0 && pinfo[w._pid].n === i && !w._rot);
     if (isUntouched) {            // um só documento e ordem intacta: mantém o PDF original intacto
       doc = docOrig; const pl = doc.getPages();
       ws.forEach(w => pages[w._pid] = pl[pinfo[w._pid].n]);
-    } else {                            // páginas reordenadas, excluídas ou múltiplos arquivos: reconstrói na ordem da tela
+    } else {                            // páginas reordenadas, excluídas, giradas ou múltiplos arquivos: reconstrói na ordem da tela
       doc = await PDFDocument.create();
       const loadedSrcs = {};
       for (const w of ws) {
@@ -661,6 +926,10 @@ $('save').onclick = async () => {
       for (const w of ws) {
         const q = pinfo[w._pid];
         const [cp] = await doc.copyPages(loadedSrcs[q.src], [q.n]);
+        if (w._rot) {
+          const curRot = cp.getRotation().angle;
+          cp.setRotation(PDFLib.degrees((curRot + w._rot) % 360));
+        }
         pages[w._pid] = doc.addPage(cp);
       }
     }
@@ -680,24 +949,25 @@ $('save').onclick = async () => {
       const pg = pages[a.page], H = pg.getHeight();
       const lh = a.lh || 1.2, rows = [], fo = r => F[a.font + ((r.b ? 1 : 0) + (r.i ? 2 : 0))];
       const ls = a.ls || 0, TW = (f, t) => f.widthOfTextAtSize(t, a.size) + ls * Array.from(t).length;
+      const maxAllowedW = Math.max(30, pg.getWidth() - a.x - 12);
+      const effectiveW = a.w ? Math.min(a.w, maxAllowedW) : maxAllowedW;
       for (const line of runsLines(a.ed)) {
         const segs = line.map(r => ({ ...r, s: winAnsi(r.s) }));
-        if (!a.w) { rows.push(segs); continue; }
         let cur = [], wd = 0;
         const pieces = [];
         for (const r of segs) for (const p0 of (r.s.match(/[^ ]* ?/g) || [])) {
           if (!p0) continue;
           let rest = p0; const f0 = fo(r);
-          while (TW(f0, rest.trimEnd()) > a.w && rest.trimEnd().length > 1) {
+          while (TW(f0, rest.trimEnd()) > effectiveW && rest.trimEnd().length > 1) {
             let n = rest.trimEnd().length - 1;
-            while (n > 1 && TW(f0, rest.slice(0, n)) > a.w) n--;
+            while (n > 1 && TW(f0, rest.slice(0, n)) > effectiveW) n--;
             pieces.push([r, rest.slice(0, n)]); rest = rest.slice(n);
           }
           pieces.push([r, rest]);
         }
         for (const [r, p] of pieces) {
           const t = { ...r, s: p }, f = fo(t), tw = TW(f, p.trimEnd());
-          if (cur.length && wd + tw > a.w) { rows.push(cur); cur = []; wd = 0; }
+          if (cur.length && wd + tw > effectiveW) { rows.push(cur); cur = []; wd = 0; }
           cur.push(t); wd += TW(f, p);
         }
         rows.push(cur);
