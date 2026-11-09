@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Conversor de PDF e Documentos - SEMED</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234f46e5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z'/%3E%3Cpath d='M14 3v5h5M9 13h6M9 17h4'/%3E%3C/svg%3E">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
+<style>
+:root{--bg:#f1f3f7;--sf:#fff;--tx:#111827;--mu:#6b7280;--ac:#4f46e5;--ac2:#eef0ff;--bd:#e3e6ee;--sh:0 1px 2px rgba(16,24,40,.06),0 4px 14px rgba(16,24,40,.06);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0c1018;--sf:#161c29;--tx:#e8eaf0;--mu:#98a2b3;--ac:#8b93ff;--ac2:#232a47;--bd:#283044}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0c1018;--sf:#161c29;--tx:#e8eaf0;--mu:#98a2b3;--ac:#8b93ff;--ac2:#232a47;--bd:#283044}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;min-height:100vh}
+body{background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+
+/* Header */
+header{position:sticky;top:0;z-index:20;background:var(--sf);border-bottom:1px solid var(--bd);box-shadow:var(--sh);display:flex;align-items:center;gap:12px;padding:8px 16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px}
+.brand .logo{width:30px;height:30px;border-radius:8px;background:var(--ac);color:#fff;display:grid;place-items:center}
+.brand .logo svg{width:18px;height:18px;stroke:#fff}
+.brand h1{font-size:15px;margin:0;font-weight:600;letter-spacing:-.2px;display:flex;align-items:center;gap:8px}
+.brand .badge{font-size:11px;font-weight:500;padding:2px 7px;background:var(--ac2);color:var(--ac);border-radius:99px}
+.nav-links{display:flex;gap:6px;margin-left:auto;align-items:center}
+.nav-btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:8px;font-size:13px;font-weight:500;text-decoration:none;border:1px solid var(--bd);background:var(--sf);color:var(--tx);cursor:pointer;transition:.15s}
+.nav-btn:hover{background:var(--ac2);color:var(--ac);border-color:var(--ac)}
+.nav-btn.active{background:var(--ac);color:#fff;border-color:var(--ac)}
+
+/* Container */
+.container{max-width:1080px;width:100%;margin:0 auto;padding:28px 20px 60px;flex:1}
+.hero{text-align:center;margin-bottom:28px}
+.hero h2{font-size:26px;font-weight:700;margin:0 0 8px;letter-spacing:-.4px}
+.hero p{color:var(--mu);margin:0;font-size:15px}
+
+/* Filter / Mode Tabs */
+.filter-tabs{display:flex;justify-content:center;gap:8px;margin-bottom:24px;flex-wrap:wrap}
+.ft-btn{border:1px solid var(--bd);background:var(--sf);color:var(--mu);padding:6px 14px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;transition:.15s}
+.ft-btn:hover{color:var(--tx);background:var(--ac2)}
+.ft-btn.active{background:var(--ac);color:#fff;border-color:var(--ac)}
+
+/* Grid de Cards */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:32px}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px;cursor:pointer;transition:transform .18s,box-shadow .18s,border-color .18s;position:relative;overflow:hidden}
+.card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(16,24,40,.09);border-color:var(--ac)}
+.card-icon{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:var(--ac2);color:var(--ac)}
+.card-icon svg{width:24px;height:24px}
+.card h3{margin:0;font-size:15px;font-weight:600}
+.card p{margin:0;font-size:12.5px;color:var(--mu);line-height:1.45}
+.card .card-badge{position:absolute;top:12px;right:12px;font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:6px;background:var(--ac2);color:var(--ac)}
+
+/* Active Tool View / Workspace */
+#workspace{background:var(--sf);border:1px solid var(--bd);border-radius:18px;box-shadow:var(--sh);padding:28px;margin-bottom:32px}
+.ws-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--bd)}
+.ws-title{display:flex;align-items:center;gap:12px}
+.ws-title h3{margin:0;font-size:18px;font-weight:600}
+.ws-close{background:transparent;border:0;padding:6px;border-radius:8px;cursor:pointer;color:var(--mu)}
+.ws-close:hover{background:var(--ac2);color:var(--ac)}
+
+/* Drop Zone */
+.dropzone{border:2px dashed var(--bd);border-radius:14px;padding:36px 20px;text-align:center;background:rgba(255,255,255,.02);cursor:pointer;transition:.2s}
+.dropzone.dragover{border-color:var(--ac);background:var(--ac2)}
+.dropzone .dz-icon{width:56px;height:56px;border-radius:16px;background:var(--ac2);color:var(--ac);display:grid;place-items:center;margin:0 auto 14px}
+.dropzone .dz-icon svg{width:28px;height:28px}
+.dropzone h4{margin:0 0 6px;font-size:16px;font-weight:600}
+.dropzone p{margin:0;font-size:13px;color:var(--mu)}
+.dropzone button{margin-top:14px;background:var(--ac);color:#fff;border:0;height:38px;padding:0 18px;border-radius:9px;font-weight:500;cursor:pointer;transition:.15s}
+.dropzone button:hover{filter:brightness(1.08)}
+
+/* File Preview List */
+.file-list{margin-top:20px;display:flex;flex-direction:column;gap:10px}
+.file-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--bd);border-radius:10px;background:var(--bg)}
+.file-item .file-name{flex:1;font-weight:500;font-size:13.5px;word-break:break-all}
+.file-item .file-size{font-size:12px;color:var(--mu);margin-left:8px}
+.file-item .file-remove{background:none;border:0;color:#ef4444;cursor:pointer;padding:4px;border-radius:6px}
+.file-item .file-remove:hover{background:#fee2e2}
+
+/* Options Bar */
+.opts-bar{display:flex;align-items:center;gap:16px;margin-top:20px;padding:14px;background:var(--bg);border-radius:10px;flex-wrap:wrap}
+.opt-grp{display:flex;align-items:center;gap:8px;font-size:13px}
+.opt-grp label{color:var(--mu)}
+.opt-grp select,.opt-grp input[type=number]{height:32px;padding:0 8px;border:1px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--tx);font-size:13px}
+
+/* Action Button */
+.ws-action{margin-top:24px;display:flex;gap:12px;justify-content:flex-end}
+.btn-primary{background:var(--ac);color:#fff;border:0;height:42px;padding:0 22px;border-radius:10px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:.15s}
+.btn-primary:hover:not(:disabled){filter:brightness(1.08)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+
+/* Progress Bar */
+.progress-box{margin-top:20px}
+.progress-bar{height:7px;background:var(--bd);border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;width:0%;background:var(--ac);transition:width .2s}
+.progress-text{font-size:12.5px;color:var(--mu);margin-top:6px;text-align:center}
+
+/* Toast */
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,8px);background:#1f2430;color:#fff;padding:10px 18px;border-radius:12px;font-size:14px;box-shadow:0 8px 24px rgba(16,24,40,.3);opacity:0;pointer-events:none;transition:.25s;z-index:50}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* Privacy footer badge */
+.privacy-badge{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:40px;color:var(--mu);font-size:13px}
+.privacy-badge svg{color:#10b981;width:17px;height:17px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="logo"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span>
+    <h1>Conversor de Arquivos <span class="badge">SEMED</span></h1>
+  </div>
+  <div class="nav-links">
+    <a href="index.html" class="nav-btn"><svg class="i" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg> Editor de PDF</a>
+    <a href="converter.html" class="nav-btn active"><svg class="i" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Conversor</a>
+  </div>
+</header>
+
+<div class="container">
+  <div class="hero">
+    <h2>Conversor de PDF e Documentos</h2>
+    <p>Converta, junte, divida e extraia arquivos com rapidez, direto no seu navegador e sem envio para servidores.</p>
+  </div>
+
+  <div class="filter-tabs">
+    <button class="ft-btn active" data-filter="all">Todos os Modelos</button>
+    <button class="ft-btn" data-filter="to-pdf">Para PDF</button>
+    <button class="ft-btn" data-filter="from-pdf">De PDF</button>
+    <button class="ft-btn" data-filter="organize">Organizar</button>
+  </div>
+
+  <!-- Workspace de Conversão Ativa -->
+  <div id="workspace" hidden>
+    <div class="ws-header">
+      <div class="ws-title">
+        <div class="card-icon" id="wsIcon"></div>
+        <div>
+          <h3 id="wsHeading">Nome da Ferramenta</h3>
+          <span style="font-size:12.5px;color:var(--mu)" id="wsDesc">Descrição</span>
+        </div>
+      </div>
+      <button class="ws-close" id="wsClose" title="Fechar"><svg class="i" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+
+    <div class="dropzone" id="dropzone">
+      <div class="dz-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div>
+      <h4>Arraste os arquivos aqui</h4>
+      <p id="dzAccept">Formatos aceitos: PDF</p>
+      <button type="button" id="dzPick">Selecionar do Computador</button>
+      <input type="file" id="fileInput" hidden>
+    </div>
+
+    <div class="file-list" id="fileList"></div>
+
+    <div class="opts-bar" id="optsBar" hidden></div>
+
+    <div class="progress-box" id="progressBox" hidden>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text" id="progressText">Iniciando processamento…</div>
+    </div>
+
+    <div class="ws-action">
+      <button class="btn-primary" id="btnConvert" disabled><svg class="i" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Converter Agora</button>
+    </div>
+  </div>
+
+  <!-- Grid de Ferramentas -->
+  <div class="tools-grid" id="toolsGrid">
+    <div class="card" data-tool="pdf-to-docx" data-cat="from-pdf">
+      <span class="card-badge">SEMED</span>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></div>
+      <h3>PDF para Word (.docx)</h3>
+      <p>Transforma documentos PDF em arquivos editáveis do Microsoft Word preservando texto e parágrafos.</p>
+    </div>
+
+    <div class="card" data-tool="docx-to-pdf" data-cat="to-pdf">
+      <span class="card-badge">Popular</span>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+      <h3>Word (.docx) para PDF</h3>
+      <p>Converte arquivos do Microsoft Word (.docx) em PDF padronizado pronto para impressão ou envio.</p>
+    </div>
+
+    <div class="card" data-tool="img-to-pdf" data-cat="to-pdf">
+      <span class="card-badge">Fotos</span>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>
+      <h3>Imagens (JPG/PNG) para PDF</h3>
+      <p>Reúne fotos, escaneamentos e imagens avulsas em um único documento PDF organizado.</p>
+    </div>
+
+    <div class="card" data-tool="pdf-to-img" data-cat="from-pdf">
+      <span class="card-badge">Alta Res</span>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg></div>
+      <h3>PDF para Imagens (JPG/PNG)</h3>
+      <p>Extrai cada página do PDF em imagem de alta fidelidade (baixe avulsas ou em pacote .ZIP).</p>
+    </div>
+
+    <div class="card" data-tool="pdf-to-xlsx" data-cat="from-pdf">
+      <span class="card-badge">Planilha</span>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm3 4h12M6 12h12M6 17h12M10 7v10M14 7v10"/></svg></div>
+      <h3>PDF para Excel (.xlsx)</h3>
+      <p>Extrai tabelas e linhas de dados do PDF diretamente para uma planilha Excel editável.</p>
+    </div>
+
+    <div class="card" data-tool="merge-pdf" data-cat="organize">
+      <span class="card-badge">Unir</span>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M8 7v10M12 4v16M16 7v10M4 12h16"/></svg></div>
+      <h3>Juntar múltiplos PDFs</h3>
+      <p>Mescle vários arquivos PDF em um único documento sequencial com apenas um clique.</p>
+    </div>
+
+    <div class="card" data-tool="split-pdf" data-cat="organize">
+      <span class="card-badge">Dividir</span>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.242 4.242 3 3 0 004.242-4.242zm0-8.484a3 3 0 10-4.242-4.242 3 3 0 004.242 4.242z"/></svg></div>
+      <h3>Dividir PDF (Extrair páginas)</h3>
+      <p>Separe intervalos de páginas ou gere um novo arquivo PDF contendo apenas as páginas desejadas.</p>
+    </div>
+
+    <div class="card" data-tool="pdf-to-txt" data-cat="from-pdf">
+      <span class="card-badge">Texto</span>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+      <h3>PDF para Texto (.txt)</h3>
+      <p>Extrai todo o conteúdo textual do PDF de forma limpa e estruturada para cópia ou relatórios.</p>
+    </div>
+  </div>
+
+  <div class="privacy-badge">
+    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <span>100% Seguro: seus arquivos nunca saem deste dispositivo e são processados localmente.</span>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const toast = msg => {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._tm); t._tm = setTimeout(() => t.classList.remove('show'), 2600);
+};
+
+/* Ferramentas e Configurações */
+const TOOLS = {
+  'pdf-to-docx': {
+    name: 'PDF para Word (.docx)',
+    desc: 'Extrai texto formatado, títulos e parágrafos para Microsoft Word.',
+    accept: '.pdf,application/pdf',
+    acceptText: 'Formatos aceitos: PDF (.pdf)',
+    multiple: false,
+    icon: '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>'
+  },
+  'docx-to-pdf': {
+    name: 'Word (.docx) para PDF',
+    desc: 'Converte arquivo DOCX em PDF formatado.',
+    accept: '.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    acceptText: 'Formatos aceitos: Word (.docx)',
+    multiple: false,
+    icon: '<svg viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'
+  },
+  'img-to-pdf': {
+    name: 'Imagens para PDF',
+    desc: 'Combina fotos JPG/PNG em um arquivo PDF.',
+    accept: 'image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp',
+    acceptText: 'Formatos aceitos: JPG, PNG, WEBP',
+    multiple: true,
+    icon: '<svg viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>'
+  },
+  'pdf-to-img': {
+    name: 'PDF para Imagens',
+    desc: 'Renderiza cada página do PDF em imagem JPG ou PNG.',
+    accept: '.pdf,application/pdf',
+    acceptText: 'Formatos aceitos: PDF (.pdf)',
+    multiple: false,
+    icon: '<svg viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>'
+  },
+  'pdf-to-xlsx': {
+    name: 'PDF para Excel (.xlsx)',
+    desc: 'Converte linhas e tabelas do PDF para planilha Excel.',
+    accept: '.pdf,application/pdf',
+    acceptText: 'Formatos aceitos: PDF (.pdf)',
+    multiple: false,
+    icon: '<svg viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm3 4h12M6 12h12M6 17h12M10 7v10M14 7v10"/></svg>'
+  },
+  'merge-pdf': {
+    name: 'Juntar múltiplos PDFs',
+    desc: 'Une vários arquivos PDF em um único documento sequencial.',
+    accept: '.pdf,application/pdf',
+    acceptText: 'Formatos aceitos: 2 ou mais arquivos PDF',
+    multiple: true,
+    icon: '<svg viewBox="0 0 24 24"><path d="M8 7v10M12 4v16M16 7v10M4 12h16"/></svg>'
+  },
+  'split-pdf': {
+    name: 'Dividir PDF',
+    desc: 'Extrai páginas selecionadas para um novo arquivo PDF.',
+    accept: '.pdf,application/pdf',
+    acceptText: 'Formatos aceitos: PDF (.pdf)',
+    multiple: false,
+    icon: '<svg viewBox="0 0 24 24"><path d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.242 4.242 3 3 0 004.242-4.242zm0-8.484a3 3 0 10-4.242-4.242 3 3 0 004.242 4.242z"/></svg>'
+  },
+  'pdf-to-txt': {
+    name: 'PDF para Texto Puro (.txt)',
+    desc: 'Extrai todo o texto do PDF preservando quebras de linha.',
+    accept: '.pdf,application/pdf',
+    acceptText: 'Formatos aceitos: PDF (.pdf)',
+    multiple: false,
+    icon: '<svg viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'
+  }
+};
+
+let currentTool = null;
+let selectedFiles = [];
+
+/* Filtros de Categoria */
+document.querySelectorAll('.ft-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.ft-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const f = btn.dataset.filter;
+    document.querySelectorAll('.tools-grid .card').forEach(c => {
+      c.style.display = (f === 'all' || c.dataset.cat === f) ? 'flex' : 'none';
+    });
+  };
+});
+
+/* Selecionar Ferramenta */
+document.querySelectorAll('.card').forEach(card => {
+  card.onclick = () => openTool(card.dataset.tool);
+});
+
+function openTool(toolKey) {
+  const conf = TOOLS[toolKey];
+  if (!conf) return;
+  currentTool = toolKey;
+  selectedFiles = [];
+
+  $('wsHeading').textContent = conf.name;
+  $('wsDesc').textContent = conf.desc;
+  $('wsIcon').innerHTML = conf.icon;
+  $('dzAccept').textContent = conf.acceptText;
+  $('fileInput').accept = conf.accept;
+  $('fileInput').multiple = !!conf.multiple;
+  $('fileList').innerHTML = '';
+  $('optsBar').innerHTML = '';
+  $('optsBar').hidden = true;
+  $('progressBox').hidden = true;
+  $('btnConvert').disabled = true;
+
+  // Opções específicas
+  if (toolKey === 'pdf-to-img') {
+    $('optsBar').innerHTML = `
+      <div class="opt-grp">
+        <label>Formato:</label>
+        <select id="optImgFmt"><option value="image/jpeg">JPG</option><option value="image/png">PNG</option></select>
+      </div>
+      <div class="opt-grp">
+        <label>Qualidade:</label>
+        <select id="optImgDpi"><option value="2">Alta (300 DPI)</option><option value="1.5">Média (150 DPI)</option><option value="1">Padrão</option></select>
+      </div>
+    `;
+    $('optsBar').hidden = false;
+  } else if (toolKey === 'split-pdf') {
+    $('optsBar').innerHTML = `
+      <div class="opt-grp">
+        <label>Páginas (ex: 1, 3-5):</label>
+        <input type="text" id="optPages" placeholder="1-3" style="width:140px;height:32px;padding:0 8px;border:1px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--tx)">
+      </div>
+    `;
+    $('optsBar').hidden = false;
+  } else if (toolKey === 'img-to-pdf') {
+    $('optsBar').innerHTML = `
+      <div class="opt-grp">
+        <label>Orientação:</label>
+        <select id="optOrient"><option value="auto">Automática</option><option value="portrait">Retrato (A4)</option><option value="landscape">Paisagem (A4)</option></select>
+      </div>
+    `;
+    $('optsBar').hidden = false;
+  }
+
+  $('workspace').hidden = false;
+  $('workspace').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+$('wsClose').onclick = () => {
+  $('workspace').hidden = true;
+  currentTool = null;
+  selectedFiles = [];
+};
+
+/* Drag and Drop */
+const dz = $('dropzone');
+$('dzPick').onclick = () => $('fileInput').click();
+dz.onclick = e => { if (e.target !== $('dzPick')) $('fileInput').click(); };
+
+['dragenter', 'dragover'].forEach(n => dz.addEventListener(n, e => { e.preventDefault(); dz.classList.add('dragover'); }));
+['dragleave', 'drop'].forEach(n => dz.addEventListener(n, e => { e.preventDefault(); dz.classList.remove('dragover'); }));
+
+dz.addEventListener('drop', e => {
+  const fs = [...e.dataTransfer.files];
+  handleFiles(fs);
+});
+
+$('fileInput').onchange = e => {
+  const fs = [...e.target.files];
+  e.target.value = '';
+  handleFiles(fs);
+};
+
+function handleFiles(files) {
+  if (!currentTool || !files.length) return;
+  const conf = TOOLS[currentTool];
+  if (conf.multiple) {
+    selectedFiles.push(...files);
+  } else {
+    selectedFiles = [files[0]];
+  }
+  renderFileList();
+}
+
+function renderFileList() {
+  const fl = $('fileList');
+  fl.innerHTML = '';
+  selectedFiles.forEach((f, idx) => {
+    const item = document.createElement('div'); item.className = 'file-item';
+    const sz = (f.size / (1024 * 1024)).toFixed(2) + ' MB';
+    item.innerHTML = `
+      <svg class="i" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+      <span class="file-name">${f.name}</span>
+      <span class="file-size">${sz}</span>
+      <button type="button" class="file-remove" title="Remover"><svg class="i" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    `;
+    item.querySelector('.file-remove').onclick = () => {
+      selectedFiles.splice(idx, 1);
+      renderFileList();
+    };
+    fl.append(item);
+  });
+  $('btnConvert').disabled = (selectedFiles.length === 0);
+}
+
+function setProgress(pct, msg) {
+  $('progressBox').hidden = false;
+  $('progressFill').style.width = pct + '%';
+  $('progressText').textContent = msg;
+}
+
+function triggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename;
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 12000);
+}
+
+/* ==================== MOTORES DE CONVERSÃO ==================== */
+
+$('btnConvert').onclick = async () => {
+  if (!currentTool || !selectedFiles.length) return;
+  const btn = $('btnConvert'); btn.disabled = true;
+  try {
+    setProgress(10, 'Lendo arquivo…');
+    if (currentTool === 'pdf-to-docx') await convertPdfToDocx();
+    else if (currentTool === 'docx-to-pdf') await convertDocxToPdf();
+    else if (currentTool === 'img-to-pdf') await convertImgToPdf();
+    else if (currentTool === 'pdf-to-img') await convertPdfToImg();
+    else if (currentTool === 'pdf-to-xlsx') await convertPdfToXlsx();
+    else if (currentTool === 'merge-pdf') await convertMergePdf();
+    else if (currentTool === 'split-pdf') await convertSplitPdf();
+    else if (currentTool === 'pdf-to-txt') await convertPdfToTxt();
+    setProgress(100, 'Concluído com sucesso!');
+    toast('Conversão realizada com sucesso!');
+  } catch (err) {
+    console.error(err);
+    toast('Erro durante a conversão: ' + (err.message || 'Falha no processamento.'));
+    setProgress(0, 'Erro no processamento.');
+  } finally {
+    btn.disabled = false;
+  }
+};
+
+/* 1. PDF para DOCX (Word) */
+async function convertPdfToDocx() {
+  const file = selectedFiles[0];
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const doc = await pdfjsLib.getDocument({ data: bytes }).promise;
+  const paragraphs = [];
+
+  for (let n = 1; n <= doc.numPages; n++) {
+    setProgress(Math.round((n / doc.numPages) * 75), `Processando página ${n} de ${doc.numPages}…`);
+    const page = await doc.getPage(n);
+    const tc = await page.getTextContent();
+    const lines = {};
+
+    tc.items.forEach(it => {
+      const y = Math.round(it.transform[5]);
+      if (!lines[y]) lines[y] = [];
+      lines[y].push({ x: it.transform[4], str: it.str });
+    });
+
+    const sortedY = Object.keys(lines).map(Number).sort((a, b) => b - a);
+    sortedY.forEach(y => {
+      const row = lines[y].sort((a, b) => a.x - b.x);
+      const rowText = row.map(r => r.str).join(' ').trim();
+      if (rowText) {
+        paragraphs.push(new docx.Paragraph({
+          children: [new docx.TextRun(rowText)]
+        }));
+      }
+    });
+
+    if (n < doc.numPages) {
+      paragraphs.push(new docx.Paragraph({
+        children: [new docx.PageBreak()]
+      }));
+    }
+  }
+
+  setProgress(85, 'Montando documento Word (.docx)…');
+  const wordDoc = new docx.Document({
+    sections: [{ properties: {}, children: paragraphs }]
+  });
+
+  const blob = await docx.Packer.toBlob(wordDoc);
+  const outName = file.name.replace(/\.pdf$/i, '') + '.docx';
+  triggerDownload(blob, outName);
+}
+
+/* 2. Word (.docx) para PDF */
+async function convertDocxToPdf() {
+  const file = selectedFiles[0];
+  setProgress(30, 'Lendo conteúdo do Word…');
+  const arrayBuffer = await file.arrayBuffer();
+  const res = await mammoth.extractRawText({ arrayBuffer });
+  const rawText = res.value || '';
+
+  setProgress(60, 'Gerando PDF padronizado…');
+  const pdfDoc = await PDFLib.PDFDocument.create();
+  const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+  const lines = rawText.split('\n');
+
+  let page = pdfDoc.addPage([595.28, 841.89]);
+  let y = 800;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) { y -= 14; continue; }
+    if (y < 50) {
+      page = pdfDoc.addPage([595.28, 841.89]);
+      y = 800;
+    }
+    // Quebrar linhas longas
+    const words = trimmed.split(' ');
+    let currentLine = '';
+    for (const w of words) {
+      const testLine = currentLine ? currentLine + ' ' + w : w;
+      if (font.widthOfTextAtSize(testLine, 11) > 500) {
+        page.drawText(currentLine, { x: 50, y, size: 11, font });
+        y -= 15;
+        if (y < 50) { page = pdfDoc.addPage([595.28, 841.89]); y = 800; }
+        currentLine = w;
+      } else {
+        currentLine = testLine;
+      }
+    }
+    if (currentLine) {
+      page.drawText(currentLine, { x: 50, y, size: 11, font });
+      y -= 16;
+    }
+  }
+
+  setProgress(90, 'Finalizando PDF…');
+  const outBytes = await pdfDoc.save();
+  const blob = new Blob([outBytes], { type: 'application/pdf' });
+  const outName = file.name.replace(/\.docx$/i, '') + '.pdf';
+  triggerDownload(blob, outName);
+}
+
+/* 3. Imagens para PDF */
+async function convertImgToPdf() {
+  setProgress(20, 'Processando imagens…');
+  const pdfDoc = await PDFLib.PDFDocument.create();
+  const orient = $('optOrient') ? $('optOrient').value : 'auto';
+
+  for (let i = 0; i < selectedFiles.length; i++) {
+    setProgress(Math.round(((i + 1) / selectedFiles.length) * 80), `Inserindo imagem ${i + 1} de ${selectedFiles.length}…`);
+    const f = selectedFiles[i];
+    const bytes = new Uint8Array(await f.arrayBuffer());
+    let img;
+    if (/png/i.test(f.type) || /\.png$/i.test(f.name)) {
+      img = await pdfDoc.embedPng(bytes);
+    } else {
+      img = await pdfDoc.embedJpg(bytes);
+    }
+
+    let w = img.width, h = img.height;
+    if (orient === 'portrait') {
+      const p = pdfDoc.addPage([595.28, 841.89]);
+      const scale = Math.min((595.28 - 40) / w, (841.89 - 40) / h);
+      const nw = w * scale, nh = h * scale;
+      p.drawImage(img, { x: (595.28 - nw) / 2, y: (841.89 - nh) / 2, width: nw, height: nh });
+    } else if (orient === 'landscape') {
+      const p = pdfDoc.addPage([841.89, 595.28]);
+      const scale = Math.min((841.89 - 40) / w, (595.28 - 40) / h);
+      const nw = w * scale, nh = h * scale;
+      p.drawImage(img, { x: (841.89 - nw) / 2, y: (595.28 - nh) / 2, width: nw, height: nh });
+    } else {
+      // Auto: preserva resolução nativa
+      const p = pdfDoc.addPage([w, h]);
+      p.drawImage(img, { x: 0, y: 0, width: w, height: h });
+    }
+  }
+
+  const outBytes = await pdfDoc.save();
+  const blob = new Blob([outBytes], { type: 'application/pdf' });
+  triggerDownload(blob, 'imagens-convertidas.pdf');
+}
+
+/* 4. PDF para Imagens */
+async function convertPdfToImg() {
+  const file = selectedFiles[0];
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const doc = await pdfjsLib.getDocument({ data: bytes }).promise;
+  const fmt = $('optImgFmt') ? $('optImgFmt').value : 'image/jpeg';
+  const ext = fmt === 'image/png' ? '.png' : '.jpg';
+  const scale = Number($('optImgDpi') ? $('optImgDpi').value : 2);
+
+  const zip = new JSZip();
+
+  for (let n = 1; n <= doc.numPages; n++) {
+    setProgress(Math.round((n / doc.numPages) * 80), `Renderizando página ${n} de ${doc.numPages}…`);
+    const page = await doc.getPage(n);
+    const vp = page.getViewport({ scale });
+    const cv = document.createElement('canvas'); cv.width = vp.width; cv.height = vp.height;
+    const ctx = cv.getContext('2d');
+    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+
+    const b64 = cv.toDataURL(fmt, 0.95).split(',')[1];
+    zip.file(`pagina-${n}${ext}`, b64, { base64: true });
+  }
+
+  if (doc.numPages === 1) {
+    setProgress(95, 'Baixando imagem…');
+    const page = await doc.getPage(1);
+    const vp = page.getViewport({ scale });
+    const cv = document.createElement('canvas'); cv.width = vp.width; cv.height = vp.height;
+    await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+    cv.toBlob(blob => triggerDownload(blob, file.name.replace(/\.pdf$/i, '') + ext), fmt, 0.95);
+  } else {
+    setProgress(90, 'Compactando arquivo .ZIP…');
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    triggerDownload(zipBlob, file.name.replace(/\.pdf$/i, '') + '-imagens.zip');
+  }
+}
+
+/* 5. PDF para Excel (.xlsx) */
+async function convertPdfToXlsx() {
+  const file = selectedFiles[0];
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const doc = await pdfjsLib.getDocument({ data: bytes }).promise;
+  const wb = XLSX.utils.book_new();
+
+  for (let n = 1; n <= doc.numPages; n++) {
+    setProgress(Math.round((n / doc.numPages) * 75), `Extraindo dados da página ${n}…`);
+    const page = await doc.getPage(n);
+    const tc = await page.getTextContent();
+    const rows = {};
+
+    tc.items.forEach(it => {
+      const y = Math.round(it.transform[5]);
+      if (!rows[y]) rows[y] = [];
+      rows[y].push({ x: it.transform[4], str: it.str.trim() });
+    });
+
+    const sortedY = Object.keys(rows).map(Number).sort((a, b) => b - a);
+    const sheetData = [];
+
+    sortedY.forEach(y => {
+      const row = rows[y].sort((a, b) => a.x - b.x);
+      const cells = row.map(c => c.str).filter(Boolean);
+      if (cells.length) sheetData.push(cells);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(sheetData);
+    XLSX.utils.book_append_sheet(wb, ws, `Página ${n}`);
+  }
+
+  setProgress(90, 'Gerando planilha Excel…');
+  const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  triggerDownload(blob, file.name.replace(/\.pdf$/i, '') + '.xlsx');
+}
+
+/* 6. Juntar PDFs */
+async function convertMergePdf() {
+  if (selectedFiles.length < 2) {
+    throw new Error('Selecione pelo menos 2 arquivos PDF para juntar.');
+  }
+  const mergedPdf = await PDFLib.PDFDocument.create();
+
+  for (let i = 0; i < selectedFiles.length; i++) {
+    setProgress(Math.round(((i + 1) / selectedFiles.length) * 85), `Mesclando arquivo ${i + 1} de ${selectedFiles.length}…`);
+    const f = selectedFiles[i];
+    const bytes = new Uint8Array(await f.arrayBuffer());
+    const doc = await PDFLib.PDFDocument.load(bytes);
+    const copiedPages = await mergedPdf.copyPages(doc, doc.getPageIndices());
+    copiedPages.forEach(p => mergedPdf.addPage(p));
+  }
+
+  const outBytes = await mergedPdf.save();
+  const blob = new Blob([outBytes], { type: 'application/pdf' });
+  triggerDownload(blob, 'pdf-mesclado.pdf');
+}
+
+/* 7. Dividir PDF */
+async function convertSplitPdf() {
+  const file = selectedFiles[0];
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const origDoc = await PDFLib.PDFDocument.load(bytes);
+  const total = origDoc.getPageCount();
+
+  const rangeStr = $('optPages') ? $('optPages').value.trim() : '';
+  const indices = [];
+
+  if (!rangeStr) {
+    // Se não preenchido, salva todas as páginas
+    for (let i = 0; i < total; i++) indices.push(i);
+  } else {
+    const parts = rangeStr.split(',');
+    for (const p of parts) {
+      if (p.includes('-')) {
+        const [start, end] = p.split('-').map(Number);
+        for (let i = Math.max(1, start); i <= Math.min(total, end); i++) indices.push(i - 1);
+      } else {
+        const n = Number(p.trim());
+        if (n >= 1 && n <= total) indices.push(n - 1);
+      }
+    }
+  }
+
+  if (!indices.length) throw new Error('Nenhuma página válida especificada.');
+
+  setProgress(50, 'Extraindo páginas selecionadas…');
+  const splitDoc = await PDFLib.PDFDocument.create();
+  const copied = await splitDoc.copyPages(origDoc, indices);
+  copied.forEach(p => splitDoc.addPage(p));
+
+  const outBytes = await splitDoc.save();
+  const blob = new Blob([outBytes], { type: 'application/pdf' });
+  triggerDownload(blob, file.name.replace(/\.pdf$/i, '') + '-paginas-selecionadas.pdf');
+}
+
+/* 8. PDF para TXT */
+async function convertPdfToTxt() {
+  const file = selectedFiles[0];
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const doc = await pdfjsLib.getDocument({ data: bytes }).promise;
+  let fullText = '';
+
+  for (let n = 1; n <= doc.numPages; n++) {
+    setProgress(Math.round((n / doc.numPages) * 85), `Extraindo texto da página ${n} de ${doc.numPages}…`);
+    const page = await doc.getPage(n);
+    const tc = await page.getTextContent();
+    fullText += `--- PÁGINA ${n} ---\n\n`;
+    let lastY;
+    tc.items.forEach(it => {
+      if (lastY !== undefined && Math.abs(it.transform[5] - lastY) > 8) fullText += '\n';
+      fullText += it.str + ' ';
+      lastY = it.transform[5];
+    });
+    fullText += '\n\n';
+  }
+
+  const blob = new Blob([fullText], { type: 'text/plain;charset=utf-8' });
+  triggerDownload(blob, file.name.replace(/\.pdf$/i, '') + '.txt');
+}
+</script>
+</body>
+</html>

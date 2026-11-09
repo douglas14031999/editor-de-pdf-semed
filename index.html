@@ -35,6 +35,8 @@ button.on{background:var(--ac);border-color:var(--ac);color:#fff}
 .grp{display:flex;align-items:center;gap:8px;padding-left:14px;border-left:1px solid var(--bd)}
 button.pri{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:600;box-shadow:0 1px 2px rgba(79,70,229,.35)}
 button.pri:hover{background:var(--ac);filter:brightness(1.1)}
+.nav-link-btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:8px;font-size:13px;font-weight:500;text-decoration:none;border:1px solid var(--bd);background:var(--sf);color:var(--tx);cursor:pointer;transition:.15s}
+.nav-link-btn:hover{background:var(--ac2);color:var(--ac);border-color:var(--ac)}
 button:disabled{opacity:.45;cursor:not-allowed}
 input[type=color]{width:34px;height:34px;border:1px solid var(--bd);border-radius:9px;padding:3px;background:var(--sf);cursor:pointer}
 input[type=number]{width:64px;padding:0 8px}
@@ -126,6 +128,7 @@ body.t-edit .hit:hover{background:rgba(79,70,229,.12);outline:1.5px solid rgba(7
     </div>
   </div>
   <span class="grow"></span>
+  <a href="converter.html" class="nav-link-btn" title="Ir para o Conversor de Arquivos"><svg class="i" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg><span class="lb">Conversor</span></a>
   <button id="open"><svg class="i" viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><span class="lb">Abrir outro</span></button>
   <button id="save" class="pri"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>Salvar PDF</button>
 </header>
@@ -135,6 +138,10 @@ body.t-edit .hit:hover{background:rgba(79,70,229,.12);outline:1.5px solid rgba(7
   <h2>Abra um PDF para editar</h2>
   <p>Arraste o arquivo aqui ou escolha no seu aparelho.<br>Tudo acontece no seu navegador, nada é enviado.</p>
   <button class="pri" id="pick">Escolher PDF</button>
+  <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:center;gap:6px">
+    <span style="font-size:13px;color:var(--mu)">Precisa converter documentos?</span>
+    <a href="converter.html" style="font-size:13px;font-weight:600;color:var(--ac);text-decoration:none">Acessar Conversor ➔</a>
+  </div>
 </div>
 <div id="pages"></div>
 <input type="file" id="file" accept="application/pdf" hidden>
